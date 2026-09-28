@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="nb">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sukkerringer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Atkinson+Hyperlegible:wght@400;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+:root{
+  color-scheme:light;
+  --ground:#E6ECEF; --surface:#F8FAFB; --ink:#15232B; --muted:#56666E; --line:#C9D4D9;
+  --accent:#1F6F8B; --accent-ink:#FFFFFF; --oxy:#C8372D; --ring-fill:#DCE8EE;
+  --gal-fill:#E9E2F3; --fru-fill:#F6E7D2;
+  --good:#2E7D4F; --good-bg:#E1F1E7; --bad:#B3261E; --bad-bg:#F8E3E1;
+  --display:"Bricolage Grotesque", "Trebuchet MS", system-ui, sans-serif;
+  --body:"Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono:"IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    color-scheme:dark;
+    --ground:#0E161A; --surface:#162127; --ink:#E2EBEE; --muted:#93A4AB; --line:#2A3A42;
+    --accent:#6FB7D1; --accent-ink:#0E161A; --oxy:#FF7A6E; --ring-fill:#1F3540;
+    --gal-fill:#2E2740; --fru-fill:#3A2E1C;
+    --good:#6CCB92; --good-bg:#16301F; --bad:#FF8A80; --bad-bg:#3A1A18;
+  }
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--ground);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.5;padding-inline:16px;padding-block:24px 48px}
+.wrap{max-width:820px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+header{display:flex;flex-direction:column;gap:4px}
+.eyebrow{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:700}
+h1{font-family:var(--display);font-weight:800;font-size:clamp(34px,7vw,52px);line-height:1;margin:0;letter-spacing:-.02em}
+h1 .o{color:var(--oxy)}
+.sub{color:var(--muted);margin:0;max-width:62ch}
+h2{font-family:var(--display);font-weight:600;font-size:22px;margin:0;text-wrap:balance}
+h3{font-size:14px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px}
+.stack{display:flex;flex-direction:column;gap:16px}
+.f{font-family:var(--mono);font-weight:600;white-space:nowrap}
+.f sub{font-size:.72em}
+a{color:var(--accent)}
+
+/* tabs */
+.tabs{display:flex;gap:4px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:4px;flex-wrap:wrap}
+.tab{flex:1;min-width:100px;border:0;background:transparent;border-radius:9px;padding:10px 12px;font-weight:700;color:var(--muted)}
+.tab[aria-selected="true"]{background:var(--accent);color:var(--accent-ink)}
+
+/* study */
+.ref{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.ref .item{display:flex;flex-direction:column;gap:6px;padding:12px;border:1px solid var(--line);border-radius:10px}
+.ref .item svg{width:100%;height:76px}
+.ref .nm{font-weight:700}
+.ref .meta{font-size:13px;color:var(--muted);display:flex;flex-direction:column;gap:2px}
+.group-label{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:700;grid-column:1/-1;margin-top:4px}
+.facts{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;max-width:68ch}
+.rowbar{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between}
+
+button{font:inherit;color:inherit;cursor:pointer}
+button:disabled{cursor:not-allowed}
+.btn{background:var(--accent);color:var(--accent-ink);border:0;border-radius:10px;padding:12px 22px;font-weight:700;font-size:16px}
+.btn:hover:not(:disabled){filter:brightness(1.08)}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.btn:disabled{opacity:.45}
+button:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+
+/* quiz */
+.progress{display:flex;gap:6px}
+.progress span{flex:1;height:8px;border-radius:4px;background:var(--line)}
+.progress span.now{background:var(--accent)}
+.progress span.ok{background:var(--good)}
+.progress span.no{background:var(--bad)}
+.qhead{display:flex;justify-content:space-between;gap:12px;font-size:14px;color:var(--muted);font-variant-numeric:tabular-nums}
+.prompt{display:flex;flex-direction:column;gap:14px;align-items:center;text-align:center}
+.prompt .fig{width:100%;max-width:420px}
+.prompt .fig svg{width:100%;height:auto;max-height:190px}
+.prompt .big{font-size:clamp(28px,6vw,40px)}
+.prompt .q{font-size:19px;font-weight:700;max-width:52ch}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.opt{display:flex;align-items:center;gap:10px;text-align:left;background:var(--surface);border:2px solid var(--line);border-radius:10px;padding:12px 14px;min-height:56px;font-size:17px}
+.opt:hover:not(:disabled){border-color:var(--accent)}
+.opt .key{flex:none;width:24px;height:24px;border-radius:6px;border:1px solid var(--line);display:grid;place-items:center;font-size:12px;color:var(--muted);font-family:var(--mono)}
+.opt.pic{flex-direction:column;align-items:stretch;padding:10px}
+.opt.pic svg{width:100%;height:100px}
+.opt.pic .key{align-self:flex-start}
+.opt:disabled{cursor:default}
+.opt.right{border-color:var(--good);background:var(--good-bg)}
+.opt.wrong{border-color:var(--bad);background:var(--bad-bg)}
+.opt.dim{opacity:.55}
+.feedback{border-radius:10px;padding:14px 16px;display:flex;flex-direction:column;gap:4px}
+.feedback.ok{background:var(--good-bg);border:1px solid var(--good)}
+.feedback.no{background:var(--bad-bg);border:1px solid var(--bad)}
+.feedback.info{background:var(--surface);border:1px solid var(--line)}
+.feedback strong{font-size:17px}
+.feedback.ok strong{color:var(--good)}
+.feedback.no strong{color:var(--bad)}
+.score{font-family:var(--display);font-weight:800;font-size:72px;line-height:1;font-variant-numeric:tabular-nums}
+.score small{font-size:28px;color:var(--muted);font-weight:600}
+.missed{display:flex;flex-direction:column;gap:10px;margin:0;padding:0;list-style:none}
+.missed li{border-left:3px solid var(--bad);padding-left:12px}
+.missed .ans{color:var(--muted);font-size:14px}
+.hint{font-size:13px;color:var(--muted)}
+
+/* builder */
+.builder{display:grid;grid-template-columns:minmax(0,1fr) 260px;gap:16px}
+.pieces{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.piece{display:flex;flex-direction:column;align-items:center;gap:2px;background:var(--surface);border:2px solid var(--line);border-radius:10px;padding:8px 6px;font-size:14px;font-weight:700}
+.piece svg{width:52px;height:44px}
+.piece small{font-weight:400;color:var(--muted);font-size:12px}
+.piece:hover:not(:disabled){border-color:var(--accent)}
+.seg{display:flex;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.seg button{flex:1;border:0;background:transparent;padding:8px 10px;font-size:14px;font-weight:700;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.seg button:disabled{opacity:.4}
+.canvas{border:1px dashed var(--line);border-radius:12px;overflow-x:auto;background:var(--ground);min-height:140px;display:flex;align-items:center}
+.canvas svg{display:block;height:auto;max-width:none}
+.readout{display:flex;flex-direction:column;gap:10px}
+.readout dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:6px 12px;font-size:15px}
+.readout dt{color:var(--muted)}
+.readout dd{margin:0;font-weight:700}
+.idname{font-family:var(--display);font-size:26px;font-weight:800;line-height:1.1}
+.tasks{display:flex;flex-wrap:wrap;gap:6px}
+.task{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 12px;font-size:14px}
+.task[aria-pressed="true"]{border-color:var(--accent);background:var(--accent);color:var(--accent-ink)}
+.task.done::after{content:" \2713"}
+.btnrow{display:flex;flex-wrap:wrap;gap:8px}
+
+svg .ring{fill:var(--ring-fill);stroke:var(--ink);stroke-width:2.5;stroke-linejoin:round}
+svg .ring.gal{fill:var(--gal-fill)}
+svg .ring.fru{fill:var(--fru-fill)}
+svg .ring.sm{stroke-width:2}
+svg .bond{stroke:var(--ink);stroke-width:2.5;fill:none;stroke-linecap:round}
+svg .cont{stroke:var(--muted);stroke-width:2;fill:none;stroke-dasharray:3 4}
+svg .ox{fill:var(--oxy);font-family:var(--mono);font-weight:600}
+svg .oxbg{fill:var(--surface)}
+svg .lbl{fill:var(--ink);font-family:var(--mono);font-weight:600}
+svg .empty{fill:var(--muted);font-family:var(--body);font-size:15px}
+
+@media (max-width:640px){
+  .builder{grid-template-columns:1fr}
+  .opts{grid-template-columns:1fr}
+  .opts.pics{grid-template-columns:1fr 1fr}
+  .opt.pic svg{height:80px}
+}
+@media (prefers-reduced-motion:no-preference){
+  .opt,.piece{transition:border-color .15s,background .15s}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Naturfag · Karbohydrater</div>
+    <h1>Sukkerringer<span class="o">.</span></h1>
+    <p class="sub">Kjenn igjen glukose, fruktose, sukrose, laktose, stivelse og cellulose ut fra form og kjemisk formel. Bygg dem selv, og test deg med en quiz på 10 spørsmål.</p>
+  </header>
+  <nav class="tabs" role="tablist">
+    <button class="tab" role="tab" data-tab="studer" aria-selected="true">Studer</button>
+    <button class="tab" role="tab" data-tab="bygg" aria-selected="false">Bygg molekyler</button>
+    <button class="tab" role="tab" data-tab="quiz" aria-selected="false">Quiz</button>
+  </nav>
+  <main id="app" class="panel"></main>
+  <p class="hint">Fagstoff: <a href="https://ndla.no/nb/r/naturfag-sf/karbohydrater/27d0d79021" target="_blank" rel="noopener">NDLA, Karbohydrater</a>. Tegningene er forenklet: hvert hjørne i en ring er et karbonatom, og den røde O-en er oksygenatomet i ringen eller i bindingen mellom to ringer.</p>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* ================= tegning ================= */
+function vertices(cx,cy,r,n,rotDeg){
+  var p=[];
+  for(var i=0;i<n;i++){var a=(rotDeg+i*360/n)*Math.PI/180;p.push([cx+r*Math.cos(a),cy+r*Math.sin(a)]);}
+  return p;
+}
+function ptsStr(p){return p.map(function(v){return v[0].toFixed(1)+","+v[1].toFixed(1);}).join(" ");}
+function oLabel(x,y,s){
+  s=s||14;
+  return '<circle class="oxbg" cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="'+(s*0.62).toFixed(1)+'"/>'+
+         '<text class="ox" x="'+x.toFixed(1)+'" y="'+(y+s*0.36).toFixed(1)+'" font-size="'+s+'" text-anchor="middle">O</text>';
+}
+// Sekskant: flat topp, ring-O i øvre høyre hjørne. Femkant: spiss opp, ring-O på toppen.
+function ring(kind,cx,cy,r,opt){
+  opt=opt||{};
+  var hex=kind!=="pent";
+  var v=hex?vertices(cx,cy,r,6,0):vertices(cx,cy,r,5,-90);
+  var cls="ring"+(opt.small?" sm":"")+(opt.fill?" "+opt.fill:"");
+  var out='<polygon class="'+cls+'" points="'+ptsStr(v)+'"/>';
+  if(opt.label) out+='<text class="lbl" x="'+cx+'" y="'+(cy+r*0.2)+'" font-size="'+(r*0.5)+'" text-anchor="middle">'+opt.label+'</text>';
+  if(!opt.small){var o=v[hex?5:0];out+=oLabel(o[0],o[1],r*0.38);}
+  return {svg:out,v:v};
+}
+function minX(v){return v.reduce(function(a,b){return b[0]<a[0]?b:a;});}
+function maxX(v){return v.reduce(function(a,b){return b[0]>a[0]?b:a;});}
+
+function drawMono(kind){
+  return '<svg viewBox="0 0 200 120" role="img" aria-label="ringtegning">'+ring(kind,100,64,42).svg+'</svg>';
+}
+function drawDi(k1,k2){
+  var a=ring(k1,72,64,36),b=ring(k2,228,64,36),p1=maxX(a.v),p2=minX(b.v),mx=150,my=80;
+  return '<svg viewBox="0 0 300 120" role="img" aria-label="to ringer">'+
+    '<polyline class="bond" points="'+p1[0]+','+p1[1]+' '+mx+','+my+' '+p2[0]+','+p2[1]+'"/>'+
+    a.svg+b.svg+oLabel(mx,my,14)+'</svg>';
+}
+function chain(xs,y,r){
+  var s='',rings=xs.map(function(x){return ring("hex",x,y,r,{small:true});});
+  for(var i=0;i<rings.length-1;i++){var p=maxX(rings[i].v),q=minX(rings[i+1].v);s+='<line class="bond" x1="'+p[0]+'" y1="'+p[1]+'" x2="'+q[0]+'" y2="'+q[1]+'"/>';}
+  var f=minX(rings[0].v),l=maxX(rings[rings.length-1].v);
+  s+='<line class="cont" x1="'+(f[0]-18)+'" y1="'+f[1]+'" x2="'+(f[0]-3)+'" y2="'+f[1]+'"/>';
+  s+='<line class="cont" x1="'+(l[0]+3)+'" y1="'+l[1]+'" x2="'+(l[0]+18)+'" y2="'+l[1]+'"/>';
+  return s+rings.map(function(r){return r.svg;}).join("");
+}
+function drawCellulose(){
+  return '<svg viewBox="0 0 360 150" role="img" aria-label="rett kjede">'+chain([40,96,152,208,264,320],75,15)+'</svg>';
+}
+function drawStarch(){
+  var r=15,bx=152;
+  var s='<line class="bond" x1="'+bx+'" y1="'+(42+r*0.866)+'" x2="'+bx+'" y2="'+(112-r*0.866)+'"/>'+
+        chain([40,96,152,208,264,320],42,r)+chain([152,208,264],112,r);
+  return '<svg viewBox="0 0 360 150" role="img" aria-label="forgreinet kjede">'+s+'</svg>';
+}
+
+/* ================= fagdata ================= */
+var M={
+  glukose:{name:"Glukose",formula:"C6H12O6",cat:"Monosakkarid",draw:function(){return drawMono("hex");},
+    shape:"én sekskant (6-ring)",note:"Glukose er én sekskant. Fruktose har samme formel, men er en femkant."},
+  fruktose:{name:"Fruktose",formula:"C6H12O6",cat:"Monosakkarid",draw:function(){return drawMono("pent");},
+    shape:"én femkant (5-ring)",note:"Fruktose er én femkant. Glukose har samme formel, men er en sekskant."},
+  sukrose:{name:"Sukrose",formula:"C12H22O11",cat:"Disakkarid",draw:function(){return drawDi("hex","pent");},
+    shape:"sekskant + femkant",note:"Sukrose er glukose (sekskant) bundet til fruktose (femkant)."},
+  laktose:{name:"Laktose",formula:"C12H22O11",cat:"Disakkarid",draw:function(){return drawDi("hex","hex");},
+    shape:"sekskant + sekskant",note:"Laktose er glukose bundet til galaktose, så begge ringene er sekskanter."},
+  stivelse:{name:"Stivelse",formula:null,cat:"Polysakkarid",draw:drawStarch,
+    shape:"forgreinet kjede av glukose",note:"Stivelse er en kjede av glukose som forgreiner seg til siden."},
+  cellulose:{name:"Cellulose",formula:null,cat:"Polysakkarid",draw:drawCellulose,
+    shape:"rett kjede av glukose",note:"Cellulose (kostfiber) er en rett, uforgreinet kjede av glukose."}
+};
+var KEYS=Object.keys(M);
+var PAIR={glukose:"fruktose",fruktose:"glukose",sukrose:"laktose",laktose:"sukrose",stivelse:"cellulose",cellulose:"stivelse"};
+var CATS=["Monosakkarid","Disakkarid","Polysakkarid"];
+
+function f(str){return '<span class="f">'+str.replace(/(\d+)/g,"<sub>$1</sub>")+'</span>';}
+// Formaterer formler inne i vanlig tekst
+function fmt(t){return t.replace(/\b(C\d+H\d+O\d+|H2O|CO2)\b/g,function(m){return f(m);});}
+function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;}
+function pickFour(key){
+  var rest=shuffle(KEYS.filter(function(k){return k!==key&&k!==PAIR[key];}));
+  return shuffle([key,PAIR[key],rest[0],rest[1]]);
+}
+function lc(s){return s.charAt(0).toLowerCase()+s.slice(1);}
+
+/* ================= faner ================= */
+var app=document.getElementById("app");
+var tabs=document.querySelectorAll(".tab");
+function setTab(name){
+  Array.prototype.forEach.call(tabs,function(t){t.setAttribute("aria-selected",t.getAttribute("data-tab")===name?"true":"false");});
+  quiz.active=false;
+  if(name==="studer")studyScreen();
+  else if(name==="bygg")buildScreen();
+  else startQuiz();
+}
+Array.prototype.forEach.call(tabs,function(t){t.onclick=function(){setTab(t.getAttribute("data-tab"));};});
+
+/* ================= studer ================= */
+function studyScreen(){
+  var groups=[["Monosakkarider",["glukose","fruktose"]],["Disakkarider",["sukrose","laktose"]],["Polysakkarider",["stivelse","cellulose"]]];
+  var g=groups.map(function(gr){
+    return '<div class="group-label">'+gr[0]+'</div>'+gr[1].map(function(k){var m=M[k];
+      return '<div class="item">'+m.draw()+'<div class="nm">'+m.name+'</div><div class="meta">'+
+        '<span>'+(m.formula?f(m.formula):"Ingen formel å pugge")+'</span><span>'+m.shape+'</span></div></div>';
+    }).join("");
+  }).join("");
+  app.innerHTML='<div class="stack">'+
+    '<div class="rowbar"><h2>De seks molekylene</h2><div class="btnrow"><button class="btn ghost" id="toBuild">Bygg selv</button><button class="btn" id="go">Start quiz</button></div></div>'+
+    '<div class="ref">'+g+'</div>'+
+    '<h3>Verdt å kunne</h3><ul class="facts">'+
+    '<li>Glukose og fruktose har samme formel, '+f("C6H12O6")+'. Det er formen som skiller dem: sekskant eller femkant.</li>'+
+    '<li>Når to monosakkarider bindes sammen, spaltes det av ett vannmolekyl ('+f("H2O")+'). Derfor blir en disakkarid '+f("C12H22O11")+' og ikke '+f("C12H24O12")+'. Dette kalles en kondensasjonsreaksjon.</li>'+
+    '<li>Ringene bindes sammen via et oksygenatom. Denne bindingen kalles en glykosidbinding.</li>'+
+    '<li>Stivelse og cellulose er begge lange kjeder av glukose. Stivelse er forgreinet, cellulose er rett. Vi mangler enzymet som bryter bindingene i cellulose, så den går gjennom tarmen som kostfiber.</li>'+
+    '</ul></div>';
+  document.getElementById("go").onclick=function(){setTab("quiz");};
+  document.getElementById("toBuild").onclick=function(){setTab("bygg");};
+}
+
+/* ================= bygg ================= */
+var MONO={
+  glu:{name:"Glukose",kind:"hex",fill:"",label:"Glu"},
+  fru:{name:"Fruktose",kind:"pent",fill:"fru",label:"Fru"},
+  gal:{name:"Galaktose",kind:"hex",fill:"gal",label:"Gal"}
+};
+var MAXLEN=8;
+var build={main:[],branch:[],target:"fri",where:"main",history:[],done:{}};
+var TASKS=[
+  {id:"fri",name:"Fri bygging"},
+  {id:"glukose",name:"Glukose"},
+  {id:"fruktose",name:"Fruktose"},
+  {id:"sukrose",name:"Sukrose"},
+  {id:"laktose",name:"Laktose"},
+  {id:"cellulose",name:"Cellulose"},
+  {id:"stivelse",name:"Stivelse"}
+];
+
+function identify(b){
+  var all=b.main.concat(b.branch),n=all.length,br=b.branch.length>0;
+  if(!n)return null;
+  var cnt={glu:0,fru:0,gal:0};all.forEach(function(k){cnt[k]++;});
+  var formula=n===1?"C6H12O6":"C"+(6*n)+"H"+(10*n+2)+"O"+(5*n+1);
+  var r={n:n,formula:formula,water:n-1,id:null,name:"",cat:"",note:""};
+  if(n===1){
+    r.cat="Monosakkarid";
+    if(cnt.glu){r.id="glukose";r.name="Glukose";r.note="Én sekskant.";}
+    else if(cnt.fru){r.id="fruktose";r.name="Fruktose";r.note="Én femkant.";}
+    else {r.id="galaktose";r.name="Galaktose";r.note="Også en sekskant med samme formel som glukose. Atomene rundt ringen sitter litt annerledes. Den finnes i laktose.";}
+    return r;
+  }
+  if(n===2){
+    r.cat="Disakkarid";
+    if(cnt.glu===1&&cnt.fru===1){r.id="sukrose";r.name="Sukrose";r.note="Glukose + fruktose. Vanlig sukker.";}
+    else if(cnt.glu===1&&cnt.gal===1){r.id="laktose";r.name="Laktose";r.note="Glukose + galaktose. Melkesukker.";}
+    else if(cnt.glu===2){r.id="maltose";r.name="Maltose";r.note="Glukose + glukose. Maltose dannes når stivelse brytes ned. Den står ikke i læringsmålene her.";}
+    else {r.name="Ukjent disakkarid";r.note="Denne kombinasjonen er ikke en av disakkaridene du skal kunne. Sukrose er glukose + fruktose, laktose er glukose + galaktose.";}
+    return r;
+  }
+  var onlyGlu=cnt.glu===n;
+  if(!onlyGlu){r.cat="Ukjent";r.name="Ukjent karbohydrat";r.note="Stivelse og cellulose består bare av glukose. Fjern fruktose og galaktose fra kjeden.";return r;}
+  if(n===3){r.cat="Trisakkarid";r.name="For kort kjede";r.note="Tre glukose er for lite til å regnes som et polysakkarid her. Bygg minst 4.";return r;}
+  r.cat="Polysakkarid (modell)";
+  if(br){r.id="stivelse";r.name="Stivelse";r.note="Forgreinet kjede av glukose. Ekte stivelse har hundrevis til tusenvis av glukoseenheter.";}
+  else {r.id="cellulose";r.name="Cellulose";r.note="Rett kjede av glukose. Ekte cellulose har tusenvis av glukoseenheter.";}
+  return r;
+}
+
+function drawBuild(b){
+  var R=24,step=78,x0=46,yM=60,yB=170;
+  var mainN=b.main.length,brN=b.branch.length;
+  if(!mainN){
+    return '<svg viewBox="0 0 360 120" width="360" height="120"><text class="empty" x="180" y="64" text-anchor="middle">Trykk på en ring for å starte</text></svg>';
+  }
+  var cols=Math.max(mainN,brN?brN+1:0);
+  var W=x0*2+step*(cols-1), H=brN?230:120;
+  var s='',rings=[];
+  function place(key,x,y){var m=MONO[key];return ring(m.kind,x,y,R,{fill:m.fill,label:m.label});}
+  var mr=b.main.map(function(k,i){return place(k,x0+i*step,yM);});
+  var br=b.branch.map(function(k,j){return place(k,x0+(j+1)*step,yB);});
+  function link(a,c){
+    var p=maxX(a.v),q=minX(c.v),mx=(p[0]+q[0])/2,my=(p[1]+q[1])/2+8;
+    s+='<polyline class="bond" points="'+p[0]+','+p[1]+' '+mx+','+my+' '+q[0]+','+q[1]+'"/>';
+    rings.push(oLabel(mx,my,13));
+  }
+  for(var i=0;i<mr.length-1;i++)link(mr[i],mr[i+1]);
+  for(var j=0;j<br.length-1;j++)link(br[j],br[j+1]);
+  if(brN){
+    var bx=x0+step, top=yM+R*(MONO[b.main[1]].kind==="hex"?0.866:0.809), bot=yB-R*(MONO[b.branch[0]].kind==="hex"?0.866:1);
+    s+='<line class="bond" x1="'+bx+'" y1="'+top+'" x2="'+bx+'" y2="'+bot+'"/>';
+    rings.push(oLabel(bx,(top+bot)/2,13));
+  }
+  s+=mr.concat(br).map(function(r){return r.svg;}).join("")+rings.join("");
+  return '<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" role="img" aria-label="ditt molekyl">'+s+'</svg>';
+}
+
+function checkTask(){
+  var t=build.target,r=identify(build);
+  if(t==="fri")return null;
+  var want=M[t];
+  if(!r)return {ok:false,msg:"Du har ikke bygd noe ennå."};
+  if(r.id===t){build.done[t]=true;return {ok:true,msg:want.note};}
+  var hint;
+  if(t==="glukose"||t==="fruktose")hint=r.n!==1?"Et monosakkarid er bare én ring.":(t==="glukose"?"Glukose er en sekskant.":"Fruktose er en femkant.");
+  else if(t==="sukrose"||t==="laktose")hint=r.n!==2?"Et disakkarid består av nøyaktig to ringer.":(t==="sukrose"?"Sukrose er glukose + fruktose (sekskant + femkant).":"Laktose er glukose + galaktose.");
+  else if(t==="cellulose")hint=build.branch.length?"Cellulose er rett. Fjern sidegrenen.":"Cellulose er minst 4 glukose i en rett kjede, uten andre sukkerarter.";
+  else hint=build.branch.length?"Stivelse består bare av glukose, minst 4 til sammen.":"Stivelse er forgreinet. Legg til en sidegren med glukose.";
+  return {ok:false,msg:"Du har bygd: "+(r.name||"ukjent")+". "+hint};
+}
+
+function buildScreen(){
+  var pieceBtns=Object.keys(MONO).map(function(k){
+    var m=MONO[k];
+    var svg='<svg viewBox="0 0 60 50">'+ring(m.kind,30,26,20,{small:true,fill:m.fill}).svg+'</svg>';
+    return '<button class="piece" data-add="'+k+'">'+svg+m.name+'<small>'+(m.kind==="hex"?"sekskant":"femkant")+'</small></button>';
+  }).join("");
+  var taskBtns=TASKS.map(function(t){
+    return '<button class="task'+(build.done[t.id]?' done':'')+'" data-task="'+t.id+'" aria-pressed="'+(build.target===t.id)+'">'+(t.id==="fri"?t.name:"Bygg "+lc(t.name))+'</button>';
+  }).join("");
+  app.innerHTML='<div class="stack">'+
+    '<div class="stack" style="gap:8px"><h3>Velg oppgave</h3><div class="tasks" id="tasks">'+taskBtns+'</div></div>'+
+    '<div class="builder">'+
+      '<div class="stack">'+
+        '<div class="canvas" id="canvas"></div>'+
+        '<div class="stack" style="gap:8px"><h3>Legg til ring</h3><div class="pieces">'+pieceBtns+'</div></div>'+
+        '<div class="stack" style="gap:8px"><h3>Bygg på</h3><div class="seg" id="seg">'+
+          '<button data-where="main">Hovedkjede</button><button data-where="branch">Sidegren</button></div>'+
+          '<div class="hint" id="seghint"></div></div>'+
+        '<div class="btnrow"><button class="btn ghost" id="undo">Angre</button><button class="btn ghost" id="clear">Tøm</button><button class="btn" id="check">Sjekk svaret</button></div>'+
+        '<div id="bfb"></div>'+
+      '</div>'+
+      '<aside class="readout panel" id="readout"></aside>'+
+    '</div></div>';
+  Array.prototype.forEach.call(app.querySelectorAll("[data-add]"),function(b){b.onclick=function(){addPiece(b.getAttribute("data-add"));};});
+  Array.prototype.forEach.call(app.querySelectorAll("[data-where]"),function(b){b.onclick=function(){build.where=b.getAttribute("data-where");refreshBuild();};});
+  Array.prototype.forEach.call(app.querySelectorAll("[data-task]"),function(b){b.onclick=function(){
+    build.target=b.getAttribute("data-task");build.main=[];build.branch=[];build.history=[];build.where="main";buildScreen();};});
+  document.getElementById("undo").onclick=function(){
+    var last=build.history.pop();if(!last)return;build[last].pop();
+    if(build.main.length<2&&build.where==="branch")build.where="main";
+    document.getElementById("bfb").innerHTML="";refreshBuild();};
+  document.getElementById("clear").onclick=function(){build.main=[];build.branch=[];build.history=[];build.where="main";document.getElementById("bfb").innerHTML="";refreshBuild();};
+  document.getElementById("check").onclick=function(){
+    var res=checkTask();if(!res)return;
+    document.getElementById("bfb").innerHTML='<div class="feedback '+(res.ok?"ok":"no")+'"><strong>'+(res.ok?"Riktig.":"Ikke helt.")+'</strong><span>'+fmt(res.msg)+'</span></div>';
+    if(res.ok){var tb=app.querySelector('[data-task="'+build.target+'"]');if(tb)tb.classList.add("done");}
+  };
+  refreshBuild();
+}
+function addPiece(k){
+  var list=build.where;
+  if(list==="branch"&&build.main.length<2)list="main";
+  if(build[list].length>=MAXLEN){document.getElementById("bfb").innerHTML='<div class="feedback info"><span>Maks '+MAXLEN+' ringer per kjede i denne modellen.</span></div>';return;}
+  build[list].push(k);build.history.push(list);
+  document.getElementById("bfb").innerHTML="";
+  refreshBuild();
+}
+function refreshBuild(){
+  document.getElementById("canvas").innerHTML=drawBuild(build);
+  var canBranch=build.main.length>=2;
+  Array.prototype.forEach.call(app.querySelectorAll("[data-where]"),function(b){
+    var w=b.getAttribute("data-where");
+    b.setAttribute("aria-pressed",String(build.where===w));
+    if(w==="branch")b.disabled=!canBranch;
+  });
+  document.getElementById("seghint").textContent=canBranch
+    ?"Sidegrenen festes under ring nr. 2 i hovedkjeden."
+    :"Du trenger minst 2 ringer i hovedkjeden før du kan lage en sidegren.";
+  document.getElementById("undo").disabled=!build.history.length;
+  document.getElementById("clear").disabled=!build.history.length;
+  document.getElementById("check").disabled=build.target==="fri";
+  var t=build.target,task=t==="fri"?"Bygg hva du vil og se hva det blir.":"Oppgave: bygg "+lc(M[t].name)+".";
+  var r=identify(build),html='<div class="hint">'+task+'</div>';
+  if(!r){html+='<div class="idname">Tomt</div><p class="hint" style="margin:0">Legg til ringer for å se navn, type og formel.</p>';}
+  else{
+    // I en oppgave vises ikke navnet før eleven trykker Sjekk
+    var showName=t==="fri";
+    html+='<div class="idname">'+(showName?r.name:"Ditt molekyl")+'</div><dl>'+
+      '<dt>Ringer</dt><dd>'+r.n+'</dd>'+
+      '<dt>Type</dt><dd>'+(showName?r.cat:(r.n===1?"Monosakkarid":r.n===2?"Disakkarid":"Kjede"))+'</dd>'+
+      '<dt>Formel</dt><dd>'+f(r.formula)+'</dd>'+
+      '<dt>Vann avspaltet</dt><dd>'+r.water+' '+f("H2O")+'</dd></dl>'+
+      (r.n>1?'<p class="hint" style="margin:0">Hver binding mellom to ringer spalter av ett '+f("H2O")+'. '+r.n+' × '+f("C6H12O6")+' minus '+r.water+' × '+f("H2O")+' = '+f(r.formula)+'.</p>':'')+
+      (r.n>=4?'<p class="hint" style="margin:0">Polysakkarider skrives ofte som '+f("(C6H10O5)n")+' fordi kjeden er så lang.</p>':'')+
+      (showName&&r.note?'<p style="margin:0">'+fmt(r.note)+'</p>':'');
+  }
+  document.getElementById("readout").innerHTML=html;
+}
+
+/* ================= quiz ================= */
+function buildPool(){
+  var t={form:[],velg:[],formelType:[],navnFormel:[],navnType:[],begrep:[]};
+  KEYS.forEach(function(k){
+    var m=M[k];
+    t.form.push({ask:"Hvilket molekyl er dette?",fig:m.draw(),
+      opts:pickFour(k).map(function(o){return {html:M[o].name,ok:o===k};}),explain:m.note,answer:m.name});
+    t.velg.push({ask:"Hvilken tegning viser <b>"+lc(m.name)+"</b>?",pics:true,
+      opts:pickFour(k).map(function(o){return {html:M[o].draw(),ok:o===k};}),explain:m.note,answer:m.name+": "+m.shape});
+    t.navnType.push({ask:"Hva slags karbohydrat er <b>"+lc(m.name)+"</b>?",
+      opts:CATS.map(function(c){return {html:c,ok:c===m.cat};}),
+      explain:m.name+" er et "+lc(m.cat)+": "+m.shape+".",answer:m.cat});
+    if(m.formula){
+      t.navnFormel.push({ask:"Hva er den kjemiske formelen til <b>"+lc(m.name)+"</b>?",
+        opts:shuffle(["C6H12O6","C12H22O11","C12H24O12"]).map(function(x){return {html:f(x),ok:x===m.formula};}),
+        explain:m.cat==="Monosakkarid"
+          ?m.name+" er et monosakkarid med 6 karbonatomer: C6H12O6."
+          :"To C6H12O6 bindes sammen og mister ett vannmolekyl (H2O). Det gir C12H22O11.",
+        answer:m.formula});
+    }
+  });
+  t.formelType.push({ask:"Et sukker har formelen under. Hva slags karbohydrat er det?",big:f("C6H12O6"),
+    opts:CATS.map(function(c){return {html:c,ok:c==="Monosakkarid"};}),
+    explain:"C6H12O6 er et monosakkarid. Både glukose og fruktose har denne formelen, så du trenger formen for å skille dem.",answer:"Monosakkarid"});
+  t.formelType.push({ask:"Et sukker har formelen under. Hva slags karbohydrat er det?",big:f("C12H22O11"),
+    opts:CATS.map(function(c){return {html:c,ok:c==="Disakkarid"};}),
+    explain:"C12H22O11 er et disakkarid. Både sukrose og laktose har denne formelen, så du trenger formen for å skille dem.",answer:"Disakkarid"});
+  function mc(ask,right,wrong,explain){
+    return {ask:ask,opts:shuffle([right].concat(wrong)).map(function(x){return {html:fmt(x),ok:x===right};}),explain:explain,answer:right};
+  }
+  t.begrep.push(mc("Hvilket karbohydrat er det samme som kostfiber?","Cellulose",["Stivelse","Sukrose","Laktose"],
+    "Cellulose er kostfiber. Det er en rett kjede av glukose som kroppen ikke klarer å bryte ned."));
+  t.begrep.push(mc("Hvilke to monosakkarider består sukrose av?","Glukose + fruktose",["Glukose + glukose","Glukose + galaktose"],
+    "Sukrose er glukose (sekskant) + fruktose (femkant)."));
+  t.begrep.push(mc("Hvilke to monosakkarider består laktose av?","Glukose + galaktose",["Glukose + fruktose","Fruktose + fruktose"],
+    "Laktose (melkesukker) er glukose + galaktose. Begge er sekskanter."));
+  t.begrep.push(mc("Stivelse og cellulose er lange kjeder av hvilket molekyl?","Glukose",["Fruktose","Sukrose","Laktose"],
+    "Begge er kjeder av glukose. Stivelse er forgreinet, cellulose er rett."));
+  t.begrep.push(mc("Hvordan skiller du stivelse fra cellulose?","Stivelse er forgreinet, cellulose er rett",["Stivelse er rett, cellulose er forgreinet","Stivelse består av femkanter","De har ulik formel som du må pugge"],
+    "Stivelse har sidegrener. Cellulose er én rett, uforgreinet kjede."));
+  t.begrep.push(mc("Hva skjer når to monosakkarider bindes sammen?","Et vannmolekyl (H2O) spaltes av",["Et CO2-molekyl spaltes av","Et oksygenmolekyl tas opp","Formelen blir nøyaktig det dobbelte"],
+    "Det kalles en kondensasjonsreaksjon. Derfor blir formelen C12H22O11 og ikke C12H24O12."));
+  t.begrep.push(mc("Hvilket atom binder to sukkerringer sammen?","Oksygen",["Karbon","Hydrogen","Nitrogen"],
+    "Ringene bindes sammen via et oksygenatom. Denne bindingen kalles en glykosidbinding."));
+  t.begrep.push(mc("Hvorfor kan vi ikke fordøye cellulose?","Vi mangler enzymet som bryter bindingene",["Cellulose inneholder ikke glukose","Cellulose er et fettstoff","Molekylet er for lite"],
+    "Cellulose er bygd av glukose, men bindingene er av en annen type enn i stivelse. Vi mangler enzymet som bryter dem, så cellulosen går gjennom tarmen som kostfiber."));
+  return t;
+}
+// Trekker spørsmål på rundgang fra hver type, så en runde alltid har en blanding.
+function makeRound(){
+  var t=buildPool(),types=shuffle(Object.keys(t)),lists={},out=[];
+  types.forEach(function(k){lists[k]=shuffle(t[k]);});
+  while(out.length<10){
+    var added=false;
+    for(var i=0;i<types.length&&out.length<10;i++){var q=lists[types[i]].shift();if(q){out.push(q);added=true;}}
+    if(!added)break;
+  }
+  return shuffle(out);
+}
+var quiz={round:[],i:0,score:0,results:[],answered:false,active:false};
+function startQuiz(){
+  quiz={round:makeRound(),i:0,score:0,results:[],answered:false,active:true};
+  renderQ();
+}
+function progress(){
+  return '<div class="progress" aria-hidden="true">'+quiz.round.map(function(_,i){
+    var c=i<quiz.results.length?(quiz.results[i]?"ok":"no"):(i===quiz.i?"now":"");
+    return '<span class="'+c+'"></span>';}).join("")+'</div>';
+}
+function renderQ(){
+  var q=quiz.round[quiz.i];
+  var p='<div class="q">'+q.ask+'</div>'+(q.fig?'<div class="fig">'+q.fig+'</div>':'')+(q.big?'<div class="big">'+q.big+'</div>':'');
+  var opts=q.opts.map(function(o,n){
+    return '<button class="opt'+(q.pics?' pic':'')+'" data-n="'+n+'"><span class="key">'+(n+1)+'</span>'+(q.pics?o.html:'<span>'+o.html+'</span>')+'</button>';}).join("");
+  app.innerHTML='<div class="stack">'+
+    '<div class="qhead"><span>Spørsmål '+(quiz.i+1)+' av '+quiz.round.length+'</span><span id="sc">Poeng '+quiz.score+'</span></div>'+
+    progress()+'<div class="prompt">'+p+'</div>'+
+    '<div class="opts'+(q.pics?' pics':'')+'" id="opts">'+opts+'</div><div id="fb"></div></div>';
+  quiz.answered=false;
+  Array.prototype.forEach.call(app.querySelectorAll(".opt"),function(b){b.onclick=function(){answer(+b.getAttribute("data-n"));};});
+}
+function answer(n){
+  if(quiz.answered)return;
+  quiz.answered=true;
+  var q=quiz.round[quiz.i],ok=q.opts[n].ok;
+  if(ok)quiz.score++;
+  quiz.results.push(ok);q.chosenOk=ok;
+  Array.prototype.forEach.call(app.querySelectorAll(".opt"),function(b,idx){
+    b.disabled=true;
+    if(q.opts[idx].ok)b.classList.add("right");else if(idx===n)b.classList.add("wrong");else b.classList.add("dim");
+  });
+  var last=quiz.i===quiz.round.length-1;
+  document.getElementById("fb").innerHTML=
+    '<div class="feedback '+(ok?"ok":"no")+'"><strong>'+(ok?"Riktig.":"Feil.")+'</strong><span>'+fmt(q.explain)+'</span></div>'+
+    '<div class="rowbar" style="margin-top:14px"><span class="hint">Trykk Enter for å gå videre</span><button class="btn" id="next">'+(last?"Se resultat":"Neste spørsmål")+'</button></div>';
+  document.getElementById("sc").textContent="Poeng "+quiz.score;
+  app.querySelector(".progress").outerHTML=progress();
+  var nx=document.getElementById("next");nx.onclick=nextQ;nx.focus();
+}
+function nextQ(){if(quiz.i<quiz.round.length-1){quiz.i++;renderQ();}else endScreen();}
+function endScreen(){
+  quiz.active=false;
+  var s=quiz.score;
+  var msg=s===10?"Full pott. Du kan sukkerartene dine.":s>=7?"Godt jobbet. Se over de du bommet på under.":s>=4?"Du er på vei. Les forklaringene under og prøv igjen.":"Gå tilbake til Studer, bygg molekylene selv, og prøv igjen.";
+  var missed=quiz.round.filter(function(q){return !q.chosenOk;});
+  var list=missed.length?'<h2>Dette bommet du på</h2><ul class="missed">'+missed.map(function(q){
+    return '<li><div>'+q.ask.replace(/<\/?b>/g,"")+'</div><div class="ans">Svar: '+fmt(q.answer)+'. '+fmt(q.explain)+'</div></li>';}).join("")+'</ul>':'';
+  app.innerHTML='<div class="stack">'+progress()+
+    '<div class="score">'+s+'<small> / 10</small></div><p style="margin:0;font-size:18px">'+msg+'</p>'+list+
+    '<div class="btnrow"><button class="btn" id="again">Spill igjen</button><button class="btn ghost" id="study">Tilbake til Studer</button></div></div>';
+  document.getElementById("again").onclick=startQuiz;
+  document.getElementById("again").focus();
+  document.getElementById("study").onclick=function(){setTab("studer");};
+}
+document.addEventListener("keydown",function(e){
+  if(!quiz.active||quiz.answered||!document.getElementById("opts"))return;
+  if(/^[1-4]$/.test(e.key)){var b=app.querySelector('.opt[data-n="'+(+e.key-1)+'"]');if(b)b.click();}
+});
+
+studyScreen();
+})();
+</script>
+</body>
+</html>
